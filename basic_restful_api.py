@@ -18,6 +18,14 @@ clients = {
 def append_dictionary(dic, id):
     dic[id] = {"id": id, "name": "Client"+str(id)}
 
+def delete_element_dictionary(dic, id):
+    del_info = dic.pop(id)
+    # del_info -> DB
+
+def fix_element_dictionary(dic, old_id, new_id):
+    delete_element_dictionary(dic, old_id)
+    append_dictionary(dic, new_id)
+
 # GET /api/hello
 @app.route("/api/hello")
 def hello():
@@ -41,7 +49,7 @@ def get_client(client_id):
 
 # POST /client/list
 # {id: n}
-# curl -d "{""id"":7}" -H "Content-Type: application/json" -X POST http://localhost:5000/api/clients
+# Windows cmd> curl -d "{""id"":7}" -H "Content-Type: application/json" -X POST http://localhost:5000/client/list
 # Reference: https://blog.naver.com/wideeyed/221350638501
 @app.route("/client/list", methods=["POST"])
 def post_client():
@@ -54,12 +62,13 @@ def post_client():
     
 
 # PUT /client/list/{id}
+# Windows cmd>curl -d "{""id"":10}" -H "Content-Type: application/json" -X PUT http://localhost:5000/client/list/7
 @app.route("/client/list/<int:client_id>", methods=["PUT"])
 def put_client(client_id):
-    client = clients[client_id]
-    if client:
-        print(client)
-    return jsonify(client), 201
+    old_client = clients.get(client_id)
+    new_client = request.get_json()
+    fix_element_dictionary(clients, old_client["id"], new_client["id"])
+    return jsonify(new_client), 201
             
 
 if __name__ == "__main__":
